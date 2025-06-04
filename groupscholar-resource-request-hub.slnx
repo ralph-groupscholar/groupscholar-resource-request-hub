@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ResourceRequestHub.Tests/ResourceRequestHub.Tests.csproj" />
+  <Project Path="ResourceRequestHub/ResourceRequestHub.csproj" />
+</Solution>
