@@ -54,6 +54,12 @@ List requests:
 dotnet run --project ResourceRequestHub -- list --status open --limit 10
 ```
 
+Triage requests due soon (default 7 days):
+
+```bash
+dotnet run --project ResourceRequestHub -- triage --days 5 --priority high
+```
+
 Update status:
 
 ```bash

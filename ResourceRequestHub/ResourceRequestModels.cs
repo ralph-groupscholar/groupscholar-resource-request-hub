@@ -22,6 +22,19 @@ internal sealed record RequestRecord(
 
 internal sealed record RequestFilter(string? Status, string? Priority, int Limit);
 
+internal sealed record TriageRecord(
+    Guid Id,
+    string ScholarName,
+    string RequestType,
+    string Priority,
+    string Status,
+    DateOnly NeededBy,
+    string? Owner,
+    int DaysUntilDue,
+    DateTimeOffset UpdatedAt);
+
+internal sealed record TriageFilter(int WindowDays, string? Priority, string? Owner, int Limit);
+
 internal sealed record StatusStat(string Status, int Count);
 
 internal sealed record PriorityStat(string Priority, int Count);

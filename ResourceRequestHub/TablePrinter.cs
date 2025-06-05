@@ -65,6 +65,45 @@ internal static class TablePrinter
         Console.WriteLine($"Average days open (open/in_progress): {avgText}");
     }
 
+    public static void PrintTriage(IReadOnlyList<TriageRecord> requests)
+    {
+        if (requests.Count == 0)
+        {
+            Console.WriteLine("No triage requests found.");
+            return;
+        }
+
+        var rows = new List<string[]>
+        {
+            new[] { "ID", "Scholar", "Type", "Priority", "Status", "Needed By", "Owner", "Due In", "Updated" }
+        };
+
+        foreach (var request in requests)
+        {
+            var dueText = request.DaysUntilDue switch
+            {
+                < 0 => $"{Math.Abs(request.DaysUntilDue)}d overdue",
+                0 => "due today",
+                _ => $"{request.DaysUntilDue}d"
+            };
+
+            rows.Add(new[]
+            {
+                request.Id.ToString(),
+                request.ScholarName,
+                request.RequestType,
+                request.Priority,
+                request.Status,
+                request.NeededBy.ToString("yyyy-MM-dd"),
+                request.Owner ?? "-",
+                dueText,
+                request.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd")
+            });
+        }
+
+        Print(rows);
+    }
+
     private static void Print(IReadOnlyList<string[]> rows)
     {
         var widths = new int[rows[0].Length];

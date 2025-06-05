@@ -135,6 +135,71 @@ internal sealed class RequestRepository
         return results;
     }
 
+    public async Task<IReadOnlyList<TriageRecord>> GetTriageAsync(TriageFilter filter)
+    {
+        await using var connection = await OpenAsync();
+        await using var command = connection.CreateCommand();
+
+        var clauses = new List<string>
+        {
+            "status in ('open', 'in_progress')",
+            "needed_by is not null",
+            "needed_by <= (current_date + @window_days)"
+        };
+
+        command.Parameters.AddWithValue("window_days", filter.WindowDays);
+
+        if (!string.IsNullOrWhiteSpace(filter.Priority))
+        {
+            clauses.Add("priority = @priority");
+            command.Parameters.AddWithValue("priority", filter.Priority!);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Owner))
+        {
+            clauses.Add("owner = @owner");
+            command.Parameters.AddWithValue("owner", filter.Owner!);
+        }
+
+        var whereClause = "where " + string.Join(" and ", clauses);
+        command.CommandText = $"""
+            select id,
+                   scholar_name,
+                   request_type,
+                   priority,
+                   status,
+                   needed_by,
+                   owner,
+                   (needed_by - current_date) as days_until_due,
+                   updated_at
+            from {SchemaName}.{TableName}
+            {whereClause}
+            order by needed_by asc, priority desc, updated_at desc
+            limit @limit;
+            """;
+
+        command.Parameters.AddWithValue("limit", filter.Limit);
+
+        var results = new List<TriageRecord>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            results.Add(new TriageRecord(
+                reader.GetGuid(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetString(4),
+                DateOnly.FromDateTime(reader.GetDateTime(5)),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.GetInt32(7),
+                reader.GetFieldValue<DateTimeOffset>(8)
+            ));
+        }
+
+        return results;
+    }
+
     public async Task<bool> UpdateStatusAsync(string id, string status)
     {
         if (!Guid.TryParse(id, out var parsed))

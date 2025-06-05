@@ -13,6 +13,7 @@ internal static class HelpPrinter
         Console.WriteLine("      [--priority low|medium|high] [--status open|in_progress|fulfilled|closed]");
         Console.WriteLine("      [--needed-by YYYY-MM-DD] [--owner NAME] [--channel CHANNEL] [--notes TEXT]");
         Console.WriteLine("  list [--status STATUS] [--priority PRIORITY] [--limit N]");
+        Console.WriteLine("  triage [--days N] [--priority PRIORITY] [--owner NAME] [--limit N]");
         Console.WriteLine("  update-status --id UUID --status STATUS");
         Console.WriteLine("  stats                               Show summary stats.");
         Console.WriteLine();

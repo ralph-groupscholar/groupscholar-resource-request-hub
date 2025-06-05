@@ -35,6 +35,8 @@ internal static class Program
                 return await HandleAddAsync(command, repository);
             case "list":
                 return await HandleListAsync(command, repository);
+            case "triage":
+                return await HandleTriageAsync(command, repository);
             case "update-status":
                 return await HandleUpdateStatusAsync(command, repository);
             case "stats":
@@ -102,6 +104,20 @@ internal static class Program
         Console.WriteLine(updated
             ? $"Updated status for {id}."
             : $"No request found for {id}.");
+        return 0;
+    }
+
+    private static async Task<int> HandleTriageAsync(Command command, RequestRepository repository)
+    {
+        var filter = new TriageFilter(
+            WindowDays: command.GetIntOption("days", 7),
+            Priority: command.GetOption("priority"),
+            Owner: command.GetOption("owner"),
+            Limit: command.GetIntOption("limit", 25)
+        );
+
+        var results = await repository.GetTriageAsync(filter);
+        TablePrinter.PrintTriage(results);
         return 0;
     }
 
