@@ -20,6 +20,19 @@ internal sealed record RequestRecord(
     string? Owner,
     DateTimeOffset UpdatedAt);
 
+internal sealed record RequestExportRecord(
+    Guid Id,
+    string ScholarName,
+    string RequestType,
+    string Priority,
+    string Status,
+    DateOnly? NeededBy,
+    string? Owner,
+    string? Channel,
+    string? Notes,
+    DateTimeOffset CreatedAt,
+    DateTimeOffset UpdatedAt);
+
 internal sealed record RequestFilter(string? Status, string? Priority, int Limit);
 
 internal sealed record TriageRecord(

@@ -35,6 +35,8 @@ internal static class Program
                 return await HandleAddAsync(command, repository);
             case "list":
                 return await HandleListAsync(command, repository);
+            case "export":
+                return await HandleExportAsync(command, repository);
             case "triage":
                 return await HandleTriageAsync(command, repository);
             case "update-status":
@@ -87,6 +89,27 @@ internal static class Program
 
         var requests = await repository.ListAsync(filter);
         TablePrinter.PrintRequests(requests);
+        return 0;
+    }
+
+    private static async Task<int> HandleExportAsync(Command command, RequestRepository repository)
+    {
+        var filter = new RequestFilter(
+            Status: command.GetOption("status"),
+            Priority: command.GetOption("priority"),
+            Limit: command.GetIntOption("limit", 200)
+        );
+
+        var path = command.GetOption("path");
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmm");
+            path = $"resource-requests-{stamp}.csv";
+        }
+
+        var requests = await repository.ExportAsync(filter);
+        var count = CsvExporter.WriteRequests(path, requests);
+        Console.WriteLine($"Exported {count} requests to {Path.GetFullPath(path)}.");
         return 0;
     }
 

@@ -11,3 +11,9 @@
 - Added triage command to surface open/in-progress requests due within a configurable window.
 - Implemented triage query/filtering with priority/owner options and due-date urgency display.
 - Updated help and README usage examples.
+
+## 2026-02-08
+- Added CSV export command with filtered output and automatic file naming.
+- Added export repository query to include full request fields.
+- Added CSV exporter with escaping logic plus unit test coverage.
+- Updated CLI help and README usage examples.

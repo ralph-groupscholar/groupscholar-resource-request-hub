@@ -6,6 +6,7 @@ A C# command-line tool that logs, triages, and summarizes scholar resource reque
 - Add and track resource requests with priority and status.
 - Filter lists by status or priority.
 - Update request status as work progresses.
+- Export filtered requests to CSV for sharing.
 - Generate summary stats for operational reporting.
 - Seed realistic sample data for immediate demo value.
 
@@ -52,6 +53,12 @@ List requests:
 
 ```bash
 dotnet run --project ResourceRequestHub -- list --status open --limit 10
+```
+
+Export requests to CSV:
+
+```bash
+dotnet run --project ResourceRequestHub -- export --status open --path open-requests.csv
 ```
 
 Triage requests due soon (default 7 days):

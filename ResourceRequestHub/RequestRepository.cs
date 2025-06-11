@@ -135,6 +135,67 @@ internal sealed class RequestRepository
         return results;
     }
 
+    public async Task<IReadOnlyList<RequestExportRecord>> ExportAsync(RequestFilter filter)
+    {
+        await using var connection = await OpenAsync();
+        await using var command = connection.CreateCommand();
+
+        var clauses = new List<string>();
+        if (!string.IsNullOrWhiteSpace(filter.Status))
+        {
+            clauses.Add("status = @status");
+            command.Parameters.AddWithValue("status", filter.Status!);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Priority))
+        {
+            clauses.Add("priority = @priority");
+            command.Parameters.AddWithValue("priority", filter.Priority!);
+        }
+
+        var whereClause = clauses.Count > 0 ? "where " + string.Join(" and ", clauses) : string.Empty;
+        command.CommandText = $"""
+            select id,
+                   scholar_name,
+                   request_type,
+                   priority,
+                   status,
+                   needed_by,
+                   owner,
+                   channel,
+                   notes,
+                   created_at,
+                   updated_at
+            from {SchemaName}.{TableName}
+            {whereClause}
+            order by updated_at desc
+            limit @limit;
+            """;
+
+        command.Parameters.AddWithValue("limit", filter.Limit);
+
+        var results = new List<RequestExportRecord>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            results.Add(new RequestExportRecord(
+                reader.GetGuid(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3),
+                reader.GetString(4),
+                reader.IsDBNull(5) ? null : DateOnly.FromDateTime(reader.GetDateTime(5)),
+                reader.IsDBNull(6) ? null : reader.GetString(6),
+                reader.IsDBNull(7) ? null : reader.GetString(7),
+                reader.IsDBNull(8) ? null : reader.GetString(8),
+                reader.GetFieldValue<DateTimeOffset>(9),
+                reader.GetFieldValue<DateTimeOffset>(10)
+            ));
+        }
+
+        return results;
+    }
+
     public async Task<IReadOnlyList<TriageRecord>> GetTriageAsync(TriageFilter filter)
     {
         await using var connection = await OpenAsync();
